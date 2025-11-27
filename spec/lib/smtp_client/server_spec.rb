@@ -61,6 +61,27 @@ module SMTPClient
           ]
         end
       end
+
+      context "when force_ipv4 is enabled" do
+        before do
+          allow(Postal::Config.network).to receive(:force_ipv4?).and_return(true)
+          allow(DNSResolver.local).to receive(:a).and_return(["1.2.3.4", "2.3.4.5"])
+          allow(DNSResolver.local).to receive(:aaaa).and_return(["2a00::67a0:a::1234", "2a00::67a0:a::2345"])
+        end
+
+        it "only queries for A records, not AAAA records" do
+          server.endpoints
+          expect(DNSResolver.local).to have_received(:a).with(hostname).once
+          expect(DNSResolver.local).not_to have_received(:aaaa)
+        end
+
+        it "returns only ipv4 endpoints" do
+          expect(server.endpoints).to match [
+            have_attributes(ip_address: "1.2.3.4"),
+            have_attributes(ip_address: "2.3.4.5"),
+          ]
+        end
+      end
     end
   end
 

@@ -502,6 +502,13 @@ module Postal
       end
     end
 
+    group :network do
+      boolean :force_ipv4 do
+        description "When enabled, Postal will resolve only IPv4 addresses (A records) for SMTP sending and ignore AAAA records"
+        default false
+      end
+    end
+
     group :migration_waiter do
       boolean :enabled do
         description "Wait for all migrations to run before starting a process"
