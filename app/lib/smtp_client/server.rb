@@ -14,14 +14,16 @@ module SMTPClient
     end
 
     # Return all IP addresses for this server by resolving its hostname.
-    # IPv6 addresses will be returned first.
+    # IPv6 addresses will be returned first, unless force_ipv4 is enabled.
     #
     # @return [Array<SMTPClient::Endpoint>]
     def endpoints
       ips = []
 
-      DNSResolver.local.aaaa(@hostname).each do |ip|
-        ips << Endpoint.new(self, ip)
+      unless Postal::Config.network.force_ipv4?
+        DNSResolver.local.aaaa(@hostname).each do |ip|
+          ips << Endpoint.new(self, ip)
+        end
       end
 
       DNSResolver.local.a(@hostname).each do |ip|
